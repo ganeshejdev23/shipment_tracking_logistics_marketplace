@@ -1,14 +1,13 @@
 package com.shipment.logistics.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
 @Entity
-@Data
 public class Bid {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =
+            GenerationType.IDENTITY)
     private Long id;
 
     private Double amount;
@@ -16,4 +15,38 @@ public class Bid {
     private Long carrierId;
 
     private Long loadId;
+
+    // GETTERS & SETTERS
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public Long getCarrierId() {
+        return carrierId;
+    }
+
+    public void setCarrierId(Long carrierId) {
+        this.carrierId = carrierId;
+    }
+
+    public Long getLoadId() {
+        return loadId;
+    }
+
+    public void setLoadId(Long loadId) {
+        this.loadId = loadId;
+    }
 }

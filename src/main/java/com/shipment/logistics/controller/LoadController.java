@@ -1,32 +1,61 @@
 package com.shipment.logistics.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.shipment.logistics.entity.LoadPosting;
 import com.shipment.logistics.service.LoadService;
 
 @RestController
-@RequestMapping("/loads")
+@RequestMapping("/api/loads")
 public class LoadController {
 
 	@Autowired
-	private LoadService service;
+	private LoadService loadService;
 
+	// POST API
 	@PostMapping
 	public LoadPosting createLoad(@RequestBody LoadPosting load) {
 
-		return service.createLoad(load);
+		return loadService.createLoad(load);
 	}
 
+	// GET ALL LOADS
 	@GetMapping
 	public List<LoadPosting> getAllLoads() {
-		return service.getAllLoads();
+
+		return loadService.getAllLoads();
+	}
+
+	// GET LOAD BY ID
+	@GetMapping("/{id}")
+	public Optional<LoadPosting> getLoadById(@PathVariable Long id) {
+
+		return loadService.getLoadById(id);
+	}
+
+	// UPDATE LOAD
+	@PutMapping("/{id}")
+	public LoadPosting updateLoad(@PathVariable Long id, @RequestBody LoadPosting load) {
+
+		return loadService.updateLoad(id, load);
+	}
+
+	// DELETE LOAD
+	@DeleteMapping("/{id}")
+	public String deleteLoad(@PathVariable Long id) {
+
+		loadService.deleteLoad(id);
+
+		return "Load deleted successfully";
+	}
+
+	@PutMapping("/{loadId}/award/{carrierId}")
+	public LoadPosting awardLoad(@PathVariable Long loadId, @PathVariable Long carrierId) {
+
+		return loadService.awardLoad(loadId, carrierId);
 	}
 }
