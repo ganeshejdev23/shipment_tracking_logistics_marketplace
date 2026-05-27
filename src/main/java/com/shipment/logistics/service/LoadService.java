@@ -1,6 +1,8 @@
 package com.shipment.logistics.service;
 
 import java.util.List;
+import com.shipment.logistics.entity.Bid;
+import com.shipment.logistics.repository.BidRepository;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,8 @@ public class LoadService {
 
 	@Autowired
 	private LoadPostingRepository loadRepository;
+	@Autowired
+	private BidRepository bidRepository;
 
 	// CREATE LOAD (POST)
 	public LoadPosting createLoad(LoadPosting load) {
@@ -56,9 +60,29 @@ public class LoadService {
 
 		LoadPosting load = loadRepository.findById(loadId).orElseThrow(() -> new RuntimeException("Load not found"));
 
+		// GET ALL BIDS
+		List<Bid> bids = bidRepository.findByLoadId(loadId);
+
+		// ACCEPT ONE BID
+		// REJECT OTHERS
+		for (Bid bid : bids) {
+
+			if (bid.getCarrierId().equals(carrierId)) {
+
+				bid.setStatus("ACCEPTED");
+
+			} else {
+
+				bid.setStatus("REJECTED");
+			}
+
+			bidRepository.save(bid);
+		}
+
+		// UPDATE LOAD
 		load.setAwardedCarrierId(carrierId);
 
-		load.setStatus("ASSIGNED");
+		load.setStatus("AWAITING_PICKUP");
 
 		return loadRepository.save(load);
 	}

@@ -11,18 +11,20 @@ import com.shipment.logistics.repository.BidRepository;
 @Service
 public class BidService {
 
-    @Autowired
-    private BidRepository bidRepository;
+	@Autowired
+	private BidRepository bidRepository;
 
-    // CREATE BID
-    public Bid createBid(Bid bid) {
+	// CREATE BID
+	public Bid createBid(Bid bid) {
 
-        return bidRepository.save(bid);
-    }
+		bid.setStatus("PENDING");
 
-    // GET BIDS BY LOAD ID
-    public List<Bid> getBidsByLoadId(Long loadId) {
+		return bidRepository.save(bid);
+	}
 
-        return bidRepository.findByLoadId(loadId);
-    }
+	// GET BIDS BY LOAD ID
+	public List<Bid> getBidsByLoadId(Long loadId) {
+
+		return bidRepository.findByLoadId(loadId);
+	}
 }

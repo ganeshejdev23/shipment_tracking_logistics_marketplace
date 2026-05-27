@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Live Shipment Tracking</title>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js">
+    </script>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js">
+    </script>
+
+<!-- Leaflet Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js">
+    </script>
+
+<style>
+body {
+	font-family: Arial, sans-serif;
+	background: #f4f6f9;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+}
+
+.tracking-card {
+	background: white;
+	padding: 25px;
+	border-radius: 20px;
+	width: 600px;
+	box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+	text-align: center;
+	color: #2c3e50;
+}
+
+.shipment-id {
+	text-align: center;
+	color: #666;
+}
+
+#map {
+	height: 350px;
+	border-radius: 15px;
+	margin-top: 20px;
+}
+
+.data-box {
+	background: #ecf0f1;
+	margin-top: 20px;
+	padding: 15px;
+	border-radius: 10px;
+}
+
+.live {
+	text-align: center;
+	color: green;
+	font-weight: bold;
+	margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="tracking-card">
+
+		<h1>🚚 Live Shipment Tracking</h1>
+
+		<p class="shipment-id">Shipment ID: 2</p>
+
+		<div id="map"></div>
+
+		<div class="data-box" id="trackingData">Waiting for live
+			updates...</div>
+
+		<div class="live">🟢 LIVE</div>
+
+	</div>
+
+	<script>
+
+    // Default Hyderabad location
+    let map =
+        L.map('map')
+        .setView(
+            [17.3850, 78.4867],
+            12);
+
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            attribution:
+            '&copy; OpenStreetMap'
+        }).addTo(map);
+
+    // Truck marker
+    let truckIcon =
+    L.icon({
+        iconUrl:
+'https://cdn-icons-png.flaticon.com/512/3774/3774299.png',
+
+        iconSize: [45, 45]
+    });
+
+    let marker =
+    L.marker(
+        [17.3850, 78.4867],
+        { icon: truckIcon }
+    ).addTo(map);
+
+    // WebSocket
+    let socket =
+        new SockJS(
+            'http://localhost:8081/tracking');
+
+    let stompClient =
+        Stomp.over(socket);
+
+    stompClient.connect(
+        {},
+        function(frame) {
+
+        console.log(
+            'Connected: ' + frame);
+
+        stompClient.subscribe(
+            '/topic/tracking/2',
+
+            function(message) {
+
+            let tracking =
+                JSON.parse(
+                    message.body);
+
+            // Update marker
+            marker.setLatLng([
+                tracking.latitude,
+                tracking.longitude
+            ]);
+
+            // Move map
+            map.panTo([
+                tracking.latitude,
+                tracking.longitude
+            ]);
+
+            // Update UI
+            document
+                .getElementById(
+                    'trackingData')
+                .innerHTML =
+
+                `
+                <b>Latitude:</b>
+                ${tracking.latitude}
+                <br>
+
+                <b>Longitude:</b>
+                ${tracking.longitude}
+                <br>
+
+                <b>Timestamp:</b>
+                ${tracking.timestamp}
+                `;
+        });
+    });
+
+</script>
+
+</body>
+</html>

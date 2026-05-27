@@ -5,48 +5,61 @@ import jakarta.persistence.*;
 @Entity
 public class Bid {
 
-    @Id
-    @GeneratedValue(strategy =
-            GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private Double amount;
+	private Double amount;
 
-    private Long carrierId;
+	private Long carrierId;
 
-    private Long loadId;
+	private Long loadId;
 
-    // GETTERS & SETTERS
+	private String status;
 
-    public Long getId() {
-        return id;
-    }
+	// GETTERS & SETTERS
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public Double getAmount() {
-        return amount;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
+	public Double getAmount() {
+		return amount;
+	}
 
-    public Long getCarrierId() {
-        return carrierId;
-    }
+	public void setAmount(Double amount) {
 
-    public void setCarrierId(Long carrierId) {
-        this.carrierId = carrierId;
-    }
+		this.amount = amount;
+	}
 
-    public Long getLoadId() {
-        return loadId;
-    }
+	public Long getCarrierId() {
+		return carrierId;
+	}
 
-    public void setLoadId(Long loadId) {
-        this.loadId = loadId;
-    }
+	public void setCarrierId(Long carrierId) {
+
+		this.carrierId = carrierId;
+	}
+
+	public Long getLoadId() {
+		return loadId;
+	}
+
+	public void setLoadId(Long loadId) {
+
+		this.loadId = loadId;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+
+		this.status = status;
+	}
 }
