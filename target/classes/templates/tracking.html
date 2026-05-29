@@ -3,19 +3,19 @@
 <head>
 <title>Live Shipment Tracking</title>
 
+<!-- SockJS -->
 <script
-	src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js">
-    </script>
+	src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 
+<!-- STOMP -->
 <script
-	src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js">
-    </script>
+	src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
-<!-- Leaflet Map -->
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js">
-    </script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
 body {
@@ -25,13 +25,14 @@ body {
 	justify-content: center;
 	align-items: center;
 	min-height: 100vh;
+	margin: 0;
 }
 
-.tracking-card {
+.card {
+	width: 850px;
 	background: white;
-	padding: 25px;
+	padding: 30px;
 	border-radius: 20px;
-	width: 600px;
 	box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -40,137 +41,265 @@ h1 {
 	color: #2c3e50;
 }
 
-.shipment-id {
-	text-align: center;
-	color: #666;
+.tracking-box {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+input {
+	flex: 1;
+	padding: 12px;
+	border-radius: 10px;
+	border: 1px solid #ddd;
+	font-size: 16px;
+}
+
+button {
+	padding: 12px 20px;
+	border: none;
+	border-radius: 10px;
+	background: green;
+	color: white;
+	cursor: pointer;
+	font-size: 16px;
+}
+
+button:hover {
+	background: darkgreen;
 }
 
 #map {
-	height: 350px;
+	height: 450px;
+	width: 100%;
 	border-radius: 15px;
 	margin-top: 20px;
 }
 
-.data-box {
-	background: #ecf0f1;
+#trackingData {
 	margin-top: 20px;
+	background: #ecf0f1;
 	padding: 15px;
 	border-radius: 10px;
+	font-size: 18px;
 }
 
-.live {
+.status {
 	text-align: center;
+	margin-top: 20px;
 	color: green;
 	font-weight: bold;
-	margin-top: 15px;
+	font-size: 22px;
 }
 </style>
 </head>
 
 <body>
 
-	<div class="tracking-card">
+	<div class="card">
 
 		<h1>🚚 Live Shipment Tracking</h1>
 
-		<p class="shipment-id">Shipment ID: 2</p>
+		<div class="tracking-box">
+
+			<input type="number" id="shipmentId" placeholder="Enter Shipment ID">
+
+			<button onclick="connectTracking()">Track</button>
+
+		</div>
 
 		<div id="map"></div>
 
-		<div class="data-box" id="trackingData">Waiting for live
-			updates...</div>
+		<div id="trackingData">Waiting for live shipment updates...</div>
 
-		<div class="live">🟢 LIVE</div>
+		<div class="status">🟢 LIVE</div>
 
 	</div>
 
 	<script>
 
-    // Default Hyderabad location
-    let map =
-        L.map('map')
-        .setView(
-            [17.3850, 78.4867],
-            12);
+    let stompClient = null;
+    let subscription = null;
 
+    // CREATE MAP
+    let map = L.map('map').setView(
+        [17.3850, 78.4867],
+        12
+    );
+
+    // TILE LAYER
     L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
             attribution:
-            '&copy; OpenStreetMap'
-        }).addTo(map);
-
-    // Truck marker
-    let truckIcon =
-    L.icon({
-        iconUrl:
-'https://cdn-icons-png.flaticon.com/512/3774/3774299.png',
-
-        iconSize: [45, 45]
-    });
-
-    let marker =
-    L.marker(
-        [17.3850, 78.4867],
-        { icon: truckIcon }
+                '&copy; OpenStreetMap contributors'
+        }
     ).addTo(map);
 
-    // WebSocket
-    let socket =
-        new SockJS(
-            'http://localhost:8081/tracking');
+    // DEFAULT MARKER
+    let marker = L.marker(
+        [17.3850, 78.4867]
+    ).addTo(map);
 
-    let stompClient =
-        Stomp.over(socket);
+    function connectTracking() {
 
-    stompClient.connect(
-        {},
-        function(frame) {
+        const shipmentId =
+            document.getElementById(
+                "shipmentId"
+            ).value;
+
+        if (!shipmentId) {
+
+            alert(
+                "Please enter Shipment ID"
+            );
+
+            return;
+        }
 
         console.log(
-            'Connected: ' + frame);
+            "Connecting shipment:",
+            shipmentId
+        );
 
-        stompClient.subscribe(
-            '/topic/tracking/2',
+        // DISCONNECT OLD CONNECTION
+        if (stompClient !== null) {
 
-            function(message) {
+            try {
 
-            let tracking =
-                JSON.parse(
-                    message.body);
+                if (subscription) {
+                    subscription.unsubscribe();
+                }
 
-            // Update marker
-            marker.setLatLng([
-                tracking.latitude,
-                tracking.longitude
-            ]);
+                stompClient.disconnect();
 
-            // Move map
-            map.panTo([
-                tracking.latitude,
-                tracking.longitude
-            ]);
+            } catch(e) {
 
-            // Update UI
-            document
-                .getElementById(
-                    'trackingData')
-                .innerHTML =
+                console.log(
+                    "Disconnected old socket"
+                );
+            }
+        }
 
-                `
-                <b>Latitude:</b>
-                ${tracking.latitude}
-                <br>
+        // CREATE SOCKET
+        const socket =
+            new SockJS(
+                'http://localhost:8081/tracking'
+            );
 
-                <b>Longitude:</b>
-                ${tracking.longitude}
-                <br>
+        stompClient =
+            Stomp.over(socket);
 
-                <b>Timestamp:</b>
-                ${tracking.timestamp}
-                `;
-        });
-    });
+        // DISABLE EXTRA LOGS
+        stompClient.debug = null;
+
+        stompClient.connect(
+            {},
+            function(frame) {
+
+                console.log(
+                    "Connected:",
+                    frame
+                );
+
+                // SUBSCRIBE
+                subscription =
+                    stompClient.subscribe(
+
+                    '/topic/tracking/'
+                    + shipmentId,
+
+                    function(message) {
+
+                        console.log(
+                            "MESSAGE:",
+                            message.body
+                        );
+
+                        const tracking =
+                            JSON.parse(
+                                message.body
+                            );
+
+                        const lat =
+                            Number(
+                                tracking.latitude
+                            );
+
+                        const lng =
+                            Number(
+                                tracking.longitude
+                            );
+
+                        console.log(
+                            "Moving to:",
+                            lat,
+                            lng
+                        );
+
+                        // MOVE MARKER
+                        marker.setLatLng(
+                            [lat, lng]
+                        );
+
+                        // MOVE MAP
+                        map.flyTo(
+                            [lat, lng],
+                            15,
+                            {
+                                animate: true,
+                                duration: 1.5
+                            }
+                        );
+
+                        // FORCE MAP REFRESH
+                        setTimeout(
+                            function() {
+
+                            map.invalidateSize();
+
+                        }, 100);
+
+                        // UPDATE DATA
+                        document
+                            .getElementById(
+                                "trackingData"
+                            )
+                            .innerHTML =
+
+                            `
+                            <h3>
+                            Shipment ID:
+                            ${tracking.shipmentId}
+                            </h3>
+
+                            <p>
+                            <strong>Latitude:</strong>
+                            ${lat}
+                            </p>
+
+                            <p>
+                            <strong>Longitude:</strong>
+                            ${lng}
+                            </p>
+
+                            <p>
+                            <strong>Timestamp:</strong>
+                            ${tracking.timestamp}
+                            </p>
+                            `;
+                    }
+                );
+            }
+        );
+    }
+
+    // FIX MAP RENDER ISSUE
+    setTimeout(function () {
+
+        map.invalidateSize();
+
+    }, 500);
 
 </script>
 

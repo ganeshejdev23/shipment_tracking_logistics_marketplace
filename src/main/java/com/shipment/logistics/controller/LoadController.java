@@ -58,4 +58,18 @@ public class LoadController {
 
 		return loadService.awardLoad(loadId, carrierId);
 	}
+
+	// START DELIVERY
+	@PutMapping("/{id}/pickup")
+	public LoadPosting pickupShipment(@PathVariable Long id) {
+
+		return loadService.pickupShipment(id);
+	}
+
+	// DELIVER SHIPMENT
+	@PutMapping("/{id}/deliver")
+	public LoadPosting deliverShipment(@PathVariable Long id) {
+
+		return loadService.deliverShipment(id);
+	}
 }

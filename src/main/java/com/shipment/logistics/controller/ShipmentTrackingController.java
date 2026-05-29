@@ -1,31 +1,45 @@
 package com.shipment.logistics.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import com.shipment.logistics.entity.ShipmentTracking;
-import com.shipment.logistics.service.ShipmentTrackingService;
+import com.shipment.logistics.repository.ShipmentTrackingRepository;
 
 @RestController
 @RequestMapping("/api/tracking")
 public class ShipmentTrackingController {
 
 	@Autowired
-	private ShipmentTrackingService trackingService;
+	private ShipmentTrackingRepository trackingRepository;
 
-	// DRIVER GPS UPDATE
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
+
+	// UPDATE TRACKING
 	@PostMapping("/update")
 	public ShipmentTracking updateTracking(@RequestBody ShipmentTracking tracking) {
 
-		return trackingService.updateTracking(tracking);
+		tracking.setTimestamp(LocalDateTime.now());
+
+		ShipmentTracking savedTracking = trackingRepository.save(tracking);
+
+		// LIVE WEBSOCKET UPDATE
+		messagingTemplate.convertAndSend("/topic/tracking/" + tracking.getShipmentId(),
+
+				savedTracking);
+
+		return savedTracking;
 	}
 
-	// GET TRACKING HISTORY
+	// TRACKING HISTORY
 	@GetMapping("/{shipmentId}")
 	public List<ShipmentTracking> getTrackingHistory(@PathVariable Long shipmentId) {
 
-		return trackingService.getTrackingHistory(shipmentId);
+		return trackingRepository.findByShipmentId(shipmentId);
 	}
 }
