@@ -7,6 +7,7 @@ import com.shipment.logistics.entity.User;
 import com.shipment.logistics.repository.UserRepository;
 
 import com.shipment.logistics.security.JwtUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class AuthService {
@@ -15,9 +16,14 @@ public class AuthService {
 	private UserRepository userRepository;
 	@Autowired
 	private JwtUtil jwtUtil;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	// REGISTER USER
 	public User register(User user) {
+
+		// ENCRYPT PASSWORD
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
 		return userRepository.save(user);
 	}
@@ -26,7 +32,7 @@ public class AuthService {
 
 		User user = userRepository.findByUsername(username);
 
-		if (user != null && user.getPassword().equals(password)) {
+		if (user != null && passwordEncoder.matches(password, user.getPassword())) {
 
 			return jwtUtil.generateToken(username);
 		}
