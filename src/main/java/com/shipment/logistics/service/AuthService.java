@@ -1,21 +1,22 @@
 package com.shipment.logistics.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.shipment.logistics.entity.User;
 import com.shipment.logistics.repository.UserRepository;
-
 import com.shipment.logistics.security.JwtUtil;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class AuthService {
 
 	@Autowired
 	private UserRepository userRepository;
+
 	@Autowired
 	private JwtUtil jwtUtil;
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
@@ -28,6 +29,7 @@ public class AuthService {
 		return userRepository.save(user);
 	}
 
+	// LOGIN USER
 	public String login(String username, String password) {
 
 		User user = userRepository.findByUsername(username);
@@ -38,5 +40,11 @@ public class AuthService {
 		}
 
 		throw new RuntimeException("Invalid username or password");
+	}
+
+	// FIND USER BY USERNAME
+	public User findByUsername(String username) {
+
+		return userRepository.findByUsername(username);
 	}
 }
