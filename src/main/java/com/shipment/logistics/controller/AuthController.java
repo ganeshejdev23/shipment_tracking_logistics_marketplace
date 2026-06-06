@@ -11,7 +11,11 @@ import com.shipment.logistics.dto.LoginRequestDto;
 import com.shipment.logistics.dto.LoginResponseDto;
 import com.shipment.logistics.entity.User;
 import com.shipment.logistics.service.AuthService;
+import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Authentication", description = "APIs for user registration and login")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -19,9 +23,11 @@ public class AuthController {
 	@Autowired
 	private AuthService authService;
 
+	@Operation(summary = "Register new user", description = "Registers shipper or carrier account")
+
 	// REGISTER
 	@PostMapping("/register")
-	public User register(@RequestBody RegisterRequestDto request) {
+	public User register(@Valid @RequestBody RegisterRequestDto request) {
 
 		User user = new User();
 
@@ -34,8 +40,10 @@ public class AuthController {
 		return authService.register(user);
 	}
 
+	@Operation(summary = "Login user", description = "Authenticates user and returns JWT token")
+
 	@PostMapping("/login")
-	public LoginResponseDto login(@RequestBody LoginRequestDto request) {
+	public LoginResponseDto login(@Valid @RequestBody LoginRequestDto request) {
 
 		String token = authService.login(request.getUsername(), request.getPassword());
 

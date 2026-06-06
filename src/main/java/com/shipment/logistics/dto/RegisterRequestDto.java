@@ -1,9 +1,18 @@
 package com.shipment.logistics.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class RegisterRequestDto {
 
+	@NotBlank(message = "Username cannot be blank")
 	private String username;
+
+	@NotBlank(message = "Password cannot be blank")
+	@Size(min = 5, message = "Password must be at least 5 characters")
 	private String password;
+
+	@NotBlank(message = "Role cannot be blank")
 	private String role;
 
 	// GETTERS AND SETTERS

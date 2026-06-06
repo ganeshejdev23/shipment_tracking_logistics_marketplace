@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import com.shipment.logistics.entity.ShipmentTracking;
 import com.shipment.logistics.repository.ShipmentTrackingRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Shipment Tracking", description = "APIs for live shipment tracking updates")
 @RestController
 @RequestMapping("/api/tracking")
 public class ShipmentTrackingController {
@@ -20,6 +23,7 @@ public class ShipmentTrackingController {
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
 
+	@Operation(summary = "Update shipment coordinates", description = "Updates shipment latitude and longitude")
 	// UPDATE TRACKING
 	@PostMapping("/update")
 	public ShipmentTracking updateTracking(@RequestBody ShipmentTracking tracking) {
@@ -36,6 +40,7 @@ public class ShipmentTrackingController {
 		return savedTracking;
 	}
 
+	@Operation(summary = "Get shipment tracking", description = "Returns shipment tracking details by shipment ID")
 	// TRACKING HISTORY
 	@GetMapping("/{shipmentId}")
 	public List<ShipmentTracking> getTrackingHistory(@PathVariable Long shipmentId) {
