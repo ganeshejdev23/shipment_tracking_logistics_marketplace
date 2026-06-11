@@ -1,5 +1,6 @@
 import '../App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import {
     MapContainer,
     TileLayer,
@@ -8,6 +9,7 @@ import {
 } from 'react-leaflet';
 
 import 'leaflet/dist/leaflet.css';
+
 import L from 'leaflet';
 
 import markerIcon2x
@@ -35,7 +37,9 @@ function Dashboard() {
 
     const [status,
         setStatus] =
-        useState('Not Tracked Yet');
+        useState(
+            'Not Tracked Yet'
+        );
 
     const [latitude,
         setLatitude] =
@@ -45,19 +49,8 @@ function Dashboard() {
         setLongitude] =
         useState(null);
 
-    const handleTracking =
+    const fetchTrackingData =
         async () => {
-
-            if (
-                shipmentId === ''
-            ) {
-
-                alert(
-                    'Please enter shipment ID'
-                );
-
-                return;
-            }
 
             try {
 
@@ -79,16 +72,21 @@ function Dashboard() {
                     data.length > 0
                 ) {
 
+                    const latestTracking =
+                        data[
+                        data.length - 1
+                        ];
+
                     setStatus(
                         'IN_TRANSIT'
                     );
 
                     setLatitude(
-                        data[0].latitude
+                        latestTracking.latitude
                     );
 
                     setLongitude(
-                        data[0].longitude
+                        latestTracking.longitude
                     );
 
                 } else {
@@ -100,23 +98,56 @@ function Dashboard() {
 
             } catch (error) {
 
-                console.error(
-                    error
-                );
-
-                alert(
-                    'Error connecting to backend'
-                );
+                console.error(error);
             }
         };
-    const handleLogout = () => {
 
-        localStorage.removeItem(
-            'token'
-        );
+    const handleTracking =
+        () => {
 
-        window.location.href = '/';
-    };
+            if (
+                shipmentId === ''
+            ) {
+
+                alert(
+                    'Please enter shipment ID'
+                );
+
+                return;
+            }
+
+            fetchTrackingData();
+        };
+
+    useEffect(() => {
+
+        if (!shipmentId)
+            return;
+
+        const interval =
+            setInterval(() => {
+
+                fetchTrackingData();
+
+            }, 5000);
+
+        return () =>
+            clearInterval(
+                interval
+            );
+
+    }, [shipmentId]);
+
+    const handleLogout =
+        () => {
+
+            localStorage.removeItem(
+                'token'
+            );
+
+            window.location.href =
+                '/';
+        };
 
     return (
 
@@ -127,8 +158,10 @@ function Dashboard() {
                 <div
                     style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
+                        justifyContent:
+                            'space-between',
+                        alignItems:
+                            'center',
                         width: '100%'
                     }}
                 >
@@ -142,14 +175,22 @@ function Dashboard() {
                     </h1>
 
                     <button
-                        onClick={handleLogout}
+                        onClick={
+                            handleLogout
+                        }
                         style={{
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 15px',
-                            borderRadius: '8px',
-                            cursor: 'pointer'
+                            background:
+                                '#dc3545',
+                            color:
+                                'white',
+                            border:
+                                'none',
+                            padding:
+                                '10px 15px',
+                            borderRadius:
+                                '8px',
+                            cursor:
+                                'pointer'
                         }}
                     >
                         Logout
@@ -158,7 +199,8 @@ function Dashboard() {
                 </div>
 
                 <p>
-                    Track your shipment in real time
+                    Track your shipment
+                    in real time
                 </p>
 
                 <div className="search-box">
@@ -166,11 +208,14 @@ function Dashboard() {
                     <input
                         type="text"
                         placeholder="Enter Shipment ID"
-                        value={shipmentId}
-                        onChange={(e) =>
-                            setShipmentId(
-                                e.target.value
-                            )
+                        value={
+                            shipmentId
+                        }
+                        onChange={
+                            (e) =>
+                                setShipmentId(
+                                    e.target.value
+                                )
                         }
                     />
 
@@ -215,13 +260,10 @@ function Dashboard() {
                     longitude && (
 
                         <MapContainer
+                            key={`${latitude}-${longitude}`}
                             center={[
-                                parseFloat(
-                                    latitude
-                                ),
-                                parseFloat(
-                                    longitude
-                                )
+                                parseFloat(latitude),
+                                parseFloat(longitude)
                             ]}
                             zoom={13}
                             style={{
@@ -242,19 +284,13 @@ function Dashboard() {
 
                             <Marker
                                 position={[
-                                    parseFloat(
-                                        latitude
-                                    ),
-                                    parseFloat(
-                                        longitude
-                                    )
+                                    parseFloat(latitude),
+                                    parseFloat(longitude)
                                 ]}
                             >
 
                                 <Popup>
-                                    Shipment
-                                    Current
-                                    Location
+                                    Shipment Current Location
                                 </Popup>
 
                             </Marker>
