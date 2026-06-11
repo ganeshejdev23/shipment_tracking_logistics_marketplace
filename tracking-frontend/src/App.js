@@ -1,98 +1,34 @@
-import './App.css';
-import { useState } from 'react';
+import {
+    BrowserRouter,
+    Routes,
+    Route
+} from 'react-router-dom';
+
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 
 function App() {
 
-  const [shipmentId, setShipmentId] = useState('');
-  const [status, setStatus] = useState('Not Tracked Yet');
-  const [location, setLocation] = useState('--');
+    return (
 
-  const handleTracking = async () => {
+        <BrowserRouter>
 
-    if (shipmentId === '') {
-      alert('Please enter shipment ID');
-      return;
-    }
+            <Routes>
 
-    try {
+                <Route
+                    path="/"
+                    element={<Login />}
+                />
 
-      const response = await fetch(
-        `http://localhost:8081/api/tracking/${shipmentId}`,
-        {
-          headers: {
-            Authorization:
-              'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJyaWVyMiIsImlhdCI6MTc4MTA1NzY0MSwiZXhwIjoxNzgxMDkzNjQxfQ.u7lASsJc-wQI9TWHPOOPsQOdumzctaKuTZIxNgoKxUU'
-          }
-        }
-      );
+                <Route
+                    path="/dashboard"
+                    element={<Dashboard />}
+                />
 
-      const data = await response.json();
+            </Routes>
 
-      if (data.length > 0) {
-
-        setStatus('IN_TRANSIT');
-
-        setLocation(
-          `${data[0].latitude},
-          ${data[0].longitude}`
-        );
-
-      } else {
-
-        setStatus('No Tracking Found');
-        setLocation('--');
-      }
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert('Error connecting to backend');
-    }
-  };
-
-  return (
-    <div className="app-container">
-
-      <div className="card">
-
-        <h1>🚚 Shipment Tracking Dashboard</h1>
-
-        <p>
-          Track your shipment in real time
-        </p>
-
-        <div className="search-box">
-
-          <input
-            type="text"
-            placeholder="Enter Shipment ID"
-            value={shipmentId}
-            onChange={(e) =>
-              setShipmentId(e.target.value)
-            }
-          />
-
-          <button onClick={handleTracking}>
-            Track Shipment
-          </button>
-
-        </div>
-
-        <div className="result-box">
-
-          <h3>Shipment Details</h3>
-
-          <p>Status: {status}</p>
-
-          <p>Location: {location}</p>
-
-        </div>
-
-      </div>
-
-    </div>
-  );
+        </BrowserRouter>
+    );
 }
 
 export default App;

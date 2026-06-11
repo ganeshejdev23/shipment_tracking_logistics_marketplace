@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -69,39 +68,3 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-=======
-2 weeks submission midreview1
-
-# Shipment Tracking Logistics Marketplace
-
-## Project Overview
-
-A real-time logistics marketplace platform that enables shippers to post shipment loads and carriers to place bids.
-
-The system supports:
-
-* JWT Authentication
-* BCrypt Password Encryption
-* Shipment Load Management
-* Carrier Bidding
-* Shipment Awarding
-* Real-Time Shipment Tracking using WebSockets
-* Swagger API Documentation
-
-## Technology Stack
-
-* Java 21
-* Spring Boot
-* Spring Security
-* Spring Data JPA
-* MySQL
-* JWT
-* WebSocket
-* Swagger UI
-* HTML, CSS, JavaScript, Leaflet.js
-
-## Developed By
-
-Ganesh Ejjigiri
-
->>>>>>> 9610297a6156961ed63010178ad354c75919d322
