@@ -1,56 +1,76 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../App.css';
 
 function Login() {
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username,
+        setUsername] =
+        useState('');
 
-    const navigate = useNavigate();
+    const [password,
+        setPassword] =
+        useState('');
 
-    const handleLogin = async () => {
+    const navigate =
+        useNavigate();
 
-        try {
+    const handleLogin =
+        async () => {
 
-            const response = await fetch(
-                'http://localhost:8081/auth/login',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':
-                            'application/json'
-                    },
-                    body: JSON.stringify({
-                        username,
-                        password
-                    })
-                }
-            );
+            try {
 
-            const data =
-                await response.json();
+                const response =
+                    await fetch(
+                        'http://localhost:8081/auth/login',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+                            body:
+                                JSON.stringify({
+                                    username,
+                                    password
+                                })
+                        }
+                    );
 
-            if (data.token) {
+                const data =
+                    await response.json();
 
-                localStorage.setItem(
-                    'token',
+                if (
                     data.token
+                ) {
+
+                    localStorage.setItem(
+                        'token',
+                        data.token
+                    );
+
+                    navigate(
+                        '/dashboard'
+                    );
+
+                } else {
+
+                    alert(
+                        'Invalid Credentials'
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(
+                    error
                 );
 
-                navigate('/dashboard');
-
-            } else {
-
-                alert('Invalid Credentials');
+                alert(
+                    'Login Failed'
+                );
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert('Login Failed');
-        }
-    };
+        };
 
     return (
 
@@ -58,7 +78,13 @@ function Login() {
 
             <div className="login-card">
 
-                <h1>🚚 Logistics Login</h1>
+                <h1>
+                    🚚 Shipment Tracking Portal
+                </h1>
+
+                <p>
+                    Sign in to continue
+                </p>
 
                 <input
                     type="text"
@@ -83,7 +109,9 @@ function Login() {
                 />
 
                 <button
-                    onClick={handleLogin}
+                    onClick={
+                        handleLogin
+                    }
                 >
                     Login
                 </button>
