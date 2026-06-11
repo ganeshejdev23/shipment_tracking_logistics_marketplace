@@ -147,7 +147,7 @@ check:
 * Notification system
 * Shipment history tracking
 
-## 👨‍💻 Developed By
+## Developed By
 
 **Ganesh Ejjigiri**
 
